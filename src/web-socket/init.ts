@@ -27,9 +27,9 @@ export class SocketServer {
             if (user) {
                 this.spinner.succeed(
                     `${chalk.green(`Nueva conexion, ${chalk.yellowBright(`SocketID: ${socket.id}, UserID: ${user.id}`)}`)}`);
+                    console.log(user);
                 const WhatsappController = WhatsappControllers(socket, io, user!.id);
-
-                this.AddUser(user.id, socket.id, WhatsappController);
+                this.AddUser(user.id, socket.id);
                 this.users = this.users.map(e => {
                     if (e.UserID !== undefined && e.UserID === user!.id) {
                         return {
@@ -40,7 +40,7 @@ export class SocketServer {
                 });
                 const userIndex = this.users.findIndex(e => e !== undefined && e.UserID === user!.id);
                 /* TAREAS */
-                TaskControllers(this.users[userIndex].Whatsapp, socket, io, user.id);
+                TaskControllers(socket, io, user.id, user.UserfullName);
 
                 socket.on('disconnect', () => {
                     this.RemoveUser(user.id);
@@ -50,12 +50,11 @@ export class SocketServer {
         });
     };
 
-    private AddUser(UserID: string, SocketID: string, Whatsapp: WAConnection) {
+    private AddUser(UserID: string, SocketID: string) {
         !this.users.some(user => user.UserID === UserID) &&
             this.users.push({
                 UserID,
                 SocketID,
-                Whatsapp
             });
     };
 

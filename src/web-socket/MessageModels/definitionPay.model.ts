@@ -13,9 +13,6 @@ export class definitionPayModel {
 *Nos contactamos con Ud. en virtud de la propuesta efectuada para la cancelación de la deuda que registra con Industrial and Commercial Bank Of China (Argentina) S.A.U -ICBC-*
 *por el/los producto/s ${this.getproducts()}.*
 
-*A fin de recordarle que necesitamos URGENTE DEFINCIÓN. De no tener respuesta alguna, se dará curso a las acciones judiciales correspondiente a su caso*
-
-
 *LE INFORMAMOS QUE LAS PROPUESTAS ENVIADAS CONTINUARAN VIGENTES HASTA EL ${this.form.timeToResponse} Y PODRA REALIZAR EL PAGO HASTA EL ${this.form.timeToPay}*
 
 *Saludos cordiales.*

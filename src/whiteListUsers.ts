@@ -2,8 +2,13 @@ import { v4 as uuidv4 } from 'uuid';
 
 export const WhiteListUsersArr = () => {
     const arr = [{
-        user: 'FernandoLarrosa2894',
+        userName: 'FernandoLarrosa2894',
+        fullName: 'Fernando Larrosa',
         password: '38267212'
+    },{
+        userName: 'Lucas2310',
+        fullName: 'Lucas Sergio Villalba',
+        password: '39159881'
     }].map(e => {
         return {...e, id: uuidv4()}
     });

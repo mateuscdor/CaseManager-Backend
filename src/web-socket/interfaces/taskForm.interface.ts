@@ -6,5 +6,9 @@ export interface ITaskform {
     messageType: string;
     sendTo: string;
     timeToPay: string;
+    options: {
+        quitas: [{ condicion: number, valorQuita: number, SiNoCumple: number }],
+        cuotas: [{ condicion: number, cantidadDeCuotas: number }]
+    };
     timeToResponse: string;
 }

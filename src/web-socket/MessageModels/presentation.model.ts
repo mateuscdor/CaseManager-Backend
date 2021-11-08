@@ -1,7 +1,7 @@
 import { ICase } from "interfaces/CaseMoongose.interface";
 
 export class PresentationModel {
-    constructor(private debtor: ICase){}
+    constructor(private debtor: ICase, private Gestor: string){}
 
     getMessage(){
         return `
@@ -15,7 +15,7 @@ Me dirijo a usted en mi calidad de abogado apoderado de Industrial and Commercia
  
 Le informamos que existe la posibilidad de llegar a un acuerdo en forma extrajudicial, a fin de que cancele su deuda al contado o bien en cuotas de factible pago.
  
-Por todo lo expuesto lo invitamos a comunicarse a la brevedad con ${this.debtor.operador} de lunes a viernes en el horario de 09:00hs a 19:00hs, a los teléfonos 011- 4813-9285 /011- 4815-9509 /011- 4815- 9989 y líneas rotativas para lograr llegar a un acuerdo de pago. Vía e-mail: estudio@alabogados.com.ar o WHATSAPP (011) 11 6722-3127
+Por todo lo expuesto lo invitamos a comunicarse a la brevedad con ${this.Gestor} de lunes a viernes en el horario de 09:00hs a 19:00hs, a los teléfonos 011- 4813-9285 /011- 4815-9509 /011- 4815- 9989 y líneas rotativas para lograr llegar a un acuerdo de pago. Vía e-mail: estudio@alabogados.com.ar o WHATSAPP (011) 11 6722-3127
  
 En caso de no registrar llamado alguno, se procederá al inicio de las actuaciones judiciales.
  

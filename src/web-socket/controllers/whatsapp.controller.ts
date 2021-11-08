@@ -11,7 +11,7 @@ type UserWspStatus = {
     wsp: WAConnection
 }
 
-let UsersWspStates: UserWspStatus[] = [];
+export let UsersWspStates: UserWspStatus[] = [];
 
 const findUser = (UserID: string) => {
     const user = UsersWspStates.find(user => user.userID === UserID);
@@ -51,6 +51,11 @@ export function WhatsappControllers(socket: Socket, io: socketio.Server, userID:
         user?.wsp.on('close', () => {
             const userIndex = UsersWspStates.findIndex(f => f.userID === userID);
             UsersWspStates[userIndex].state = 'close';
+            const ws = new WAConnection();
+            ws.version = [2, 2140, 12];
+            UsersWspStates[userIndex].wsp = ws;
+            // UsersWspStates[userIndex].wsp = new WAConnection();
+            // UsersWspStates[userIndex].wsp.version = [2, 2140, 12];
             informWSPStatus(UsersWspStates[userIndex].userID);
         });
         await user?.wsp.connect();
@@ -73,10 +78,10 @@ export function WhatsappControllers(socket: Socket, io: socketio.Server, userID:
         } catch (error) {
             spinner.warn(`${chalk.redBright('Error al conectar wsp ')}`);
             console.log(error);
-            const WhatsAppConn = new WAConnection();
-            WhatsAppConn.version = [2, 2140, 12];
+            // const WhatsAppConn = new WAConnection();
+            // WhatsAppConn.version = [2, 2140, 12];
             const user = UsersWspStates.findIndex(f => f.userID === userID);
-            UsersWspStates[user].wsp = WhatsAppConn;
+            UsersWspStates[user].wsp.close();
 
             await connectWSP();
         };

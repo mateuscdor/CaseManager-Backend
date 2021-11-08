@@ -8,7 +8,7 @@ export class AuthController {
 
     async singIn(req: Request, res: Response) {
         const { username, password } = req.body;
-        const user = WhiteListUsersArr().find(f => f.user === username);
+        const user = WhiteListUsersArr().find(f => f.userName === username);
 
         if (!user) return res.status(400).json({ error: 'No existe usuario o contraseña invalida' });
         const validatePassword = () => {
@@ -17,7 +17,7 @@ export class AuthController {
         } 
         if (!validatePassword) return res.status(400).json({ error: 'No existe usuario o contraseña invalida' });
 
-        const token: string = jwt.sign({ id: user.id }, process.env.TOKEN_SECRET!, {
+        const token: string = jwt.sign({ id: user.id, UserfullName: user.fullName }, process.env.TOKEN_SECRET!, {
             expiresIn: '8 hrs',
         })
         res.json({

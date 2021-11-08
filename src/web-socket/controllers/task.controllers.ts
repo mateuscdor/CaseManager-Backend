@@ -13,7 +13,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { ITask } from "web-socket/interfaces/task.interface";
 import { ITaskform } from "web-socket/interfaces/taskForm.interface";
 import { ICase } from "interfaces/CaseMoongose.interface";
-import { IAssignment } from '../../interfaces/AssignmentMoongose.interface';
+
+/* whatsapp */
+import { UsersWspStates } from '../controllers/whatsapp.controller';
 
 type task = {
     socketID: string;
@@ -26,10 +28,10 @@ let tasks: task[] = [];
 const spinner = ora();
 
 export function TaskControllers(
-    WhatsappConnection: WAConnection,
     Socket: Socket,
     io: socketio.Server,
-    userID: string) {
+    userID: string,
+    UserFullName: string) {
     /* Actualizando el socketID de las tareas de cada usuario */
     tasks = tasks.map(e => {
         if (e.userID === userID) {
@@ -40,35 +42,38 @@ export function TaskControllers(
         };
         return e
     });
+    const WhatsappConnection = UsersWspStates.find(e => e.userID === userID)?.wsp
     /* Nueva tarea recibida */
     Socket.on('create new task', async task => {
         if (task.taskType === 'Verificar numeros en Wsp') {
-            const verified = await verifyWsp(task.phones, WhatsappConnection)
+            const verified = await verifyWsp(task.phones, userID)
             io.to(Socket.id).emit('Phones Verified', verified);
         } else {
-            const newTask = await CreateNewTask(task, userID, Socket, io, WhatsappConnection);
+            const newTask = await CreateNewTask(task, userID, UserFullName, Socket, io, WhatsappConnection!);
             tasks.push({
                 socketID: Socket.id,
                 userID,
                 task: newTask!
             });
             io.to(Socket.id).emit('new task created', newTask);
-        }
+        };
     });
     io.to(Socket.id).emit('tasks', tasks.filter(f => f.userID === userID).map(e => e.task));
 };
 
-async function CreateNewTask(TaskForm: ITaskform, UserID: string, Socket: Socket, io: socketio.Server, WhatsappConnection: WAConnection) {
+async function CreateNewTask(TaskForm: ITaskform, UserID: string,UserFullName:string, Socket: Socket, io: socketio.Server, WhatsappConnection: WAConnection) {
     if (TaskForm.taskType === 'Enviar Mensajes de Whatsapp') {
         const Cases: ICase[] = TaskForm.CasesToSendWsp;
         const amount = Cases.length;
         const task: ITask = {
             id: uuidv4(),
+            UserFullName,
             taskType: TaskForm.taskType,
             amount: amount,
             messageType: TaskForm.messageType,
             state: 'Incompleto',
             progress: 0,
+            options : TaskForm.options,
             timeToPay: TaskForm.timeToPay,
             timeToResponse: TaskForm.timeToResponse
         };
@@ -91,13 +96,13 @@ async function SendMessages(cases: ICase[], form: ITask, UserID: string, Socket:
         spinner.color = 'yellow';
         try {
             // const sentMessage = await Whatsapp.sendMessage(`549${Case.celular}@s.whatsapp.net`, Case.message, MessageType.text);
-            // const sentMessage = await Whatsapp.sendMessage(`5491124222118@s.whatsapp.net`, Case.message, MessageType.text);
-            const testPromise = new Promise<any>((resolve) => {
-                setTimeout(() => {
-                    return resolve('se termino')
-                }, 500);
-            });
-            await testPromise;
+            const sentMessage = await Whatsapp.sendMessage(`5491124222118@s.whatsapp.net`, Case.message, MessageType.text);
+            // const testPromise = new Promise<any>((resolve) => {
+            //     setTimeout(() => {
+            //         return resolve('se termino')
+            //     }, 500);
+            // });
+            // await testPromise;
             const messageSuccess = {
                 Titular: Case.titular,
                 ident_tipo: Case.ident_tipo,
@@ -146,7 +151,7 @@ function ConvertToMessages(Cases: ICase[], form: ITask) {
     const MESSAGES: any[] = [];
 
     const MESSAGETYPES: any = {
-        'Carta de Presentacion': (Debtor: ICase) => new PresentationModel(Debtor),
+        'Carta de Presentacion': (Debtor: ICase) => new PresentationModel(Debtor, form.UserFullName),
         'Carta de Oferta': (Debtor: ICase) => new PaymentPlanModel(Debtor, form),
         'Carta de Definicion': (Debtor: ICase) => new definitionPayModel(Debtor, form)
     };
@@ -193,7 +198,8 @@ function ConvertToMessages(Cases: ICase[], form: ITask) {
     return MESSAGES
 };
 
-async function verifyWsp(cellphones: any[], Whatsapp: WAConnection) {
+async function verifyWsp(cellphones: any[], userID: string) {
+    const Whatsapp = UsersWspStates.find(e => e.userID === userID)!.wsp
     console.log(Whatsapp.state)
     const cellphonesVerified: any[] = [];
     for await (const cellphone of cellphones) {
