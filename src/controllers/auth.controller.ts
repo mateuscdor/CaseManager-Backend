@@ -17,9 +17,7 @@ export class AuthController {
         } 
         if (!validatePassword) return res.status(400).json({ error: 'No existe usuario o contraseña invalida' });
 
-        const token: string = jwt.sign({ id: user.id, UserfullName: user.fullName }, process.env.TOKEN_SECRET!, {
-            expiresIn: '8 hrs',
-        })
+        const token: string = jwt.sign({ id: user.id, UserfullName: user.fullName }, process.env.TOKEN_SECRET!)
         res.json({
             token
         })
