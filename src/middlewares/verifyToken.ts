@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken'
+import { getUserById } from '../service/users.service';
 
 import { IPayload } from '../interfaces/userMoongose.interface';
-import { WhiteListedUsers } from '../whiteListUsers';
 
 export const tokenValidation = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -11,7 +11,7 @@ export const tokenValidation = async (req: Request, res: Response, next: NextFun
         if (!token) return res.status(401).json('No token provided');
 
         const decoded = jwt.verify(token, process.env.TOKEN_SECRET!) as IPayload;
-        const user = WhiteListedUsers.find(e => e.id === decoded.id);
+        const user = getUserById(decoded.id);
 
         if (!user) return res.status(404).json({ message: 'user not found' });
         req.userId = decoded.id;

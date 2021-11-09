@@ -1,0 +1,22 @@
+{
+  "WhiteListUsers": [
+    {
+      "id": "9c1946db-d9b4-407b-9084-b95df0a7100d",
+      "userName": "FernandoLarrosa2894",
+      "password": "38267212",
+      "fullName": "Fernando Larrosa"
+    },
+    {
+      "id": "9a22dd09-e068-4002-ad46-70886621210b",
+      "userName": "Lucas2310",
+      "password": "39159881",
+      "fullName": "Lucas Sergio Villalba"
+    },
+    {
+      "id": "a88bf8ec-1e44-4b91-b77e-73e1d71f0bc5",
+      "userName": "JudithLarrosa2078",
+      "password": "27051236",
+      "fullName": "Judith Romina Larrosa"
+    }
+  ]
+}
