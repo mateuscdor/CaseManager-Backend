@@ -24,6 +24,10 @@ export function WhatsappControllers(socket: Socket, io: socketio.Server, userID:
     const spinner = ora();
     let WhatsAppConn: WAConnection = new WAConnection();
     WhatsAppConn.version = [2, 2140, 12]
+    WhatsAppConn.connectOptions.logQR = false;
+    WhatsAppConn.browserDescription[0] = 'Gestor de mensajeria';
+    WhatsAppConn.browserDescription[1] = 'Gestor de mensajeria';
+    WhatsAppConn.browserDescription[2] = 'Gestor de mensajeria';
     const WspUser: UserWspStatus = {
         userID,
         socketID: socket.id,
@@ -53,6 +57,10 @@ export function WhatsappControllers(socket: Socket, io: socketio.Server, userID:
             UsersWspStates[userIndex].state = 'close';
             const ws = new WAConnection();
             ws.version = [2, 2140, 12];
+            WhatsAppConn.connectOptions.logQR = false;
+            WhatsAppConn.browserDescription[0] = 'Gestor de mensajeria';
+            WhatsAppConn.browserDescription[1] = 'Gestor de mensajeria';
+            WhatsAppConn.browserDescription[2] = 'Gestor de mensajeria';
             UsersWspStates[userIndex].wsp = ws;
             // UsersWspStates[userIndex].wsp = new WAConnection();
             // UsersWspStates[userIndex].wsp.version = [2, 2140, 12];
@@ -78,8 +86,6 @@ export function WhatsappControllers(socket: Socket, io: socketio.Server, userID:
         } catch (error) {
             spinner.warn(`${chalk.redBright('Error al conectar wsp ')}`);
             console.log(error);
-            // const WhatsAppConn = new WAConnection();
-            // WhatsAppConn.version = [2, 2140, 12];
             const user = UsersWspStates.findIndex(f => f.userID === userID);
             UsersWspStates[user].wsp.close();
 
