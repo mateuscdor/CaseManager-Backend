@@ -14,7 +14,7 @@ export interface IDB {
 }
 
 export const createUser = (UserName: string, Password: string, fullName: string) => {
-    const db = readFileSync('src/users.json', 'utf-8');
+    const db = readFileSync(path.join(__dirname, 'users.json'), 'utf-8');
     const database = JSON.parse(db) as IDB;
     database.WhiteListUsers.push({
         id: uuidv4(),
@@ -23,12 +23,12 @@ export const createUser = (UserName: string, Password: string, fullName: string)
         fullName: fullName
     });
 
-    writeFileSync(path.join(__dirname, 'src', 'user.json'), JSON.stringify(database));
+    writeFileSync(path.join(__dirname, 'users.json'), JSON.stringify(database));
 };
 
 
 export const getUserProfile = (id: string) => {
-    const db = readFileSync(path.join(__dirname, 'src', 'user.json'), 'utf-8');
+    const db = readFileSync(path.join(__dirname, 'users.json'), 'utf-8');
     const database = JSON.parse(db) as IDB;
     const user = database.WhiteListUsers.find(e => e.id === id);
 
@@ -36,14 +36,14 @@ export const getUserProfile = (id: string) => {
 };
 
 export const getUserById = (ID: string) => {
-    const db = readFileSync(path.join(__dirname, 'src', 'user.json'), 'utf-8');
+    const db = readFileSync(path.join(__dirname, 'users.json'), 'utf-8');
     const database = JSON.parse(db) as IDB;
     const user = database.WhiteListUsers.find(e => e.id === ID);
     return user;
 }
 
 export const ValidateUser = (userName: string, Password: string) => {
-    const db = readFileSync(path.join(__dirname, 'src', 'user.json'), 'utf-8');
+    const db = readFileSync(path.join(__dirname, 'users.json'), 'utf-8');
     const database = JSON.parse(db) as IDB;
     const user = database.WhiteListUsers.find(e => e.userName === userName && e.password === Password);
 
