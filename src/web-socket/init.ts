@@ -1,7 +1,6 @@
 import socketIo, { Socket } from 'socket.io';
 import { Server } from 'http';
 import { WhatsappControllers } from './controllers/whatsapp.controller';
-import { WAConnection } from '@adiwajshing/baileys';
 import { TaskControllers } from './controllers/task.controllers';
 import ora from 'ora';
 import chalk from 'chalk';
@@ -27,7 +26,6 @@ export class SocketServer {
             if (user) {
                 this.spinner.succeed(
                     `${chalk.green(`Nueva conexion, ${chalk.yellowBright(`SocketID: ${socket.id}, UserID: ${user.id}`)}`)}`);
-                    console.log(user);
                 const WhatsappController = WhatsappControllers(socket, io, user!.id);
                 this.AddUser(user.id, socket.id);
                 this.users = this.users.map(e => {

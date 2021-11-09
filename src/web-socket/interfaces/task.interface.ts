@@ -12,4 +12,5 @@ export interface ITask {
     amount: number;
     state: string;
     progress: number;
+    details: {DontHaveCellphone: any[]}
 };

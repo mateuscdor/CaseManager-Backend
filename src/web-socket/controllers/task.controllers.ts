@@ -59,9 +59,15 @@ export function TaskControllers(
         };
     });
     io.to(Socket.id).emit('tasks', tasks.filter(f => f.userID === userID).map(e => e.task));
+
+    Socket.on('delete Task', taskID => {
+        console.log(taskID);
+        tasks = tasks.filter(e => e.task.id !== taskID);
+        io.to(Socket.id).emit('tasks', tasks.filter(f => f.userID === userID).map(e => e.task));
+    });
 };
 
-async function CreateNewTask(TaskForm: ITaskform, UserID: string,UserFullName:string, Socket: Socket, io: socketio.Server, WhatsappConnection: WAConnection) {
+async function CreateNewTask(TaskForm: ITaskform, UserID: string, UserFullName: string, Socket: Socket, io: socketio.Server, WhatsappConnection: WAConnection) {
     if (TaskForm.taskType === 'Enviar Mensajes de Whatsapp') {
         const Cases: ICase[] = TaskForm.CasesToSendWsp;
         const amount = Cases.length;
@@ -73,9 +79,12 @@ async function CreateNewTask(TaskForm: ITaskform, UserID: string,UserFullName:st
             messageType: TaskForm.messageType,
             state: 'Incompleto',
             progress: 0,
-            options : TaskForm.options,
+            options: TaskForm.options,
             timeToPay: TaskForm.timeToPay,
-            timeToResponse: TaskForm.timeToResponse
+            timeToResponse: TaskForm.timeToResponse,
+            details: {
+                DontHaveCellphone: [],
+            }
         };
 
         SendMessages(Cases, task, UserID, Socket, io, WhatsappConnection);
@@ -88,15 +97,14 @@ async function SendMessages(cases: ICase[], form: ITask, UserID: string, Socket:
     const messagesSent: any[] = [];
     const messagesNotSent: any[] = [];
     const messages = ConvertToMessages(cases, form);
-
-    for await (const [index, Case] of messages.entries()) {
+    for await (const [index, Case] of messages.MESSAGES.entries()) {
         spinner.start();
 
         spinner.text = `Enviando un mensaje a: ${chalk.yellow(`${Case.titular} al ${Case.celular}, del tipo : ${Case.messageType}`)}`;
         spinner.color = 'yellow';
         try {
-            // const sentMessage = await Whatsapp.sendMessage(`549${Case.celular}@s.whatsapp.net`, Case.message, MessageType.text);
-            const sentMessage = await Whatsapp.sendMessage(`5491124222118@s.whatsapp.net`, Case.message, MessageType.text);
+            const sentMessage = await Whatsapp.sendMessage(`549${Case.celular}@s.whatsapp.net`, Case.message, MessageType.text);
+            // const sentMessage = await Whatsapp.sendMessage(`5491124222118@s.whatsapp.net`, Case.message, MessageType.text);
             // const testPromise = new Promise<any>((resolve) => {
             //     setTimeout(() => {
             //         return resolve('se termino')
@@ -130,18 +138,28 @@ async function SendMessages(cases: ICase[], form: ITask, UserID: string, Socket:
             messagesNotSent.push(messageNotSent);
         };
 
-        let taskProgress = (index / messages.length) * 100;
+        let taskProgress = (index / messages.MESSAGES.length) * 100;
         let taskIndex = tasks.findIndex(i => i.userID === UserID && i.task.id === form.id);
         tasks[taskIndex].task.progress = taskProgress;
 
+
         io.to(tasks[taskIndex].socketID).emit('current task progress',
-            { id: form.id, taskProgress: tasks[taskIndex].task.progress.toLocaleString('es-ar', { maximumFractionDigits: 0 }), state: 'en curso' });
+            {
+                id: form.id,
+                taskProgress: tasks[taskIndex].task.progress.toLocaleString('es-ar', { maximumFractionDigits: 0 }),
+                state: 'en curso',
+                details: { DontHaveCellphone: messages.dontHaveCellphone }
+            });
         tasks[taskIndex].task.state = 'en curso';
 
-        if (index + 1 === messages.length) {
+        if (index + 1 === messages.MESSAGES.length) {
             tasks[taskIndex].task.state = 'completado';
             tasks[taskIndex].task.progress = 100;
-            io.to(tasks[taskIndex].socketID).emit('current task progress', { id: form.id, taskProgress: 100, state: 'completado' });
+            tasks[taskIndex].task.details = {
+                DontHaveCellphone: messages.dontHaveCellphone,
+            };
+
+            io.to(tasks[taskIndex].socketID).emit('current task progress', { id: form.id, taskProgress: 100, state: 'completado', details: { DontHaveCellphone: messages.dontHaveCellphone } });
             spinner.succeed('Todos los mensajes han sido enviados');
         };
     };
@@ -149,6 +167,7 @@ async function SendMessages(cases: ICase[], form: ITask, UserID: string, Socket:
 
 function ConvertToMessages(Cases: ICase[], form: ITask) {
     const MESSAGES: any[] = [];
+    const dontHaveCellphone: ICase[] = [];
 
     const MESSAGETYPES: any = {
         'Carta de Presentacion': (Debtor: ICase) => new PresentationModel(Debtor, form.UserFullName),
@@ -162,7 +181,7 @@ function ConvertToMessages(Cases: ICase[], form: ITask) {
                 const MESSAGE = MESSAGETYPES[form.messageType](Case);
 
                 Case.celulares.forEach(cel => {
-                    if(cel.tipo === 'M') {
+                    if (cel.tipo === 'M') {
                         if (form.messageType === 'Carta de Oferta') {
                             const messageToSend = {
                                 titular: Case.titular,
@@ -189,13 +208,20 @@ function ConvertToMessages(Cases: ICase[], form: ITask) {
                                 MESSAGES.push(messageToSend);
                             };
                         }
+                    } else {
+                        if (!dontHaveCellphone.find(e => e.ident_nro === Case.ident_nro)) {
+                            dontHaveCellphone.push(Case);
+                        }
                     }
                 });
             }
         })
     })
 
-    return MESSAGES
+    return {
+        MESSAGES,
+        dontHaveCellphone,
+    };
 };
 
 async function verifyWsp(cellphones: any[], userID: string) {

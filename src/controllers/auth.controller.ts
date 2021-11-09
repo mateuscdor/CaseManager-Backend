@@ -1,14 +1,14 @@
 import { Request, Response } from 'express';
 import jwt from "jsonwebtoken";
 
-import { WhiteListUsersArr } from '../whiteListUsers';
+import { WhiteListedUsers } from '../whiteListUsers';
 
 export class AuthController {
     constructor() { }
 
     async singIn(req: Request, res: Response) {
         const { username, password } = req.body;
-        const user = WhiteListUsersArr().find(f => f.userName === username);
+        const user = WhiteListedUsers.find(f => f.userName === username);
 
         if (!user) return res.status(400).json({ error: 'No existe usuario o contraseña invalida' });
         const validatePassword = () => {
@@ -17,18 +17,24 @@ export class AuthController {
         } 
         if (!validatePassword) return res.status(400).json({ error: 'No existe usuario o contraseña invalida' });
 
-        const token: string = jwt.sign({ id: user.id, UserfullName: user.fullName }, process.env.TOKEN_SECRET!)
+        const token: string = jwt.sign({ id: user.id, UserfullName: user.fullName }, process.env.TOKEN_SECRET!, {
+            expiresIn: '10 hrs',
+        })
         res.json({
             token
         })
 
     }
 
-    // async userProfile(req: Request, res: Response) {
-    //     const user = await UserProfile.findOne({user: req.userId});
-    //     if (!user) return res.status(404).json('el usuario no existe');
-    //     res.json(user)
-    // }
+    async userProfile(req: Request, res: Response) {
+        const user = WhiteListedUsers.find(u => u.id === req.userId);
+        try {
+            res.json({fullName: user!.fullName})
+        } catch (error) {
+            console.log('Error al obtener el perfil de usuario');
+            if (!user) return res.status(404).json('el usuario no existe');
+        }
+    }
 
     // signOut(req: Request, res: Response) {
     //     res.send('recibido')
