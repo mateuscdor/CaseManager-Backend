@@ -103,14 +103,14 @@ async function SendMessages(cases: ICase[], form: ITask, UserID: string, Socket:
         spinner.text = `Enviando un mensaje a: ${chalk.yellow(`${Case.titular} al ${Case.celular}, del tipo : ${Case.messageType}`)}`;
         spinner.color = 'yellow';
         try {
-            // const sentMessage = await Whatsapp.sendMessage(`549${Case.celular}@s.whatsapp.net`, Case.message, MessageType.text);
+            const sentMessage = await Whatsapp.sendMessage(`549${Case.celular}@s.whatsapp.net`, Case.message, MessageType.text);
             // const sentMessage = await Whatsapp.sendMessage(`5491124222118@s.whatsapp.net`, Case.message, MessageType.text);
-            const testPromise = new Promise<any>((resolve) => {
-                setTimeout(() => {
-                    return resolve('se termino')
-                }, 500);
-            });
-            await testPromise;
+            // const testPromise = new Promise<any>((resolve) => {
+            //     setTimeout(() => {
+            //         return resolve('se termino')
+            //     }, 500);
+            // });
+            // await testPromise;
             const messageSuccess = {
                 Titular: Case.titular,
                 ident_tipo: Case.ident_tipo,
