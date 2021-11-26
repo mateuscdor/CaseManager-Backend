@@ -1,7 +1,9 @@
 import { Request, Response } from 'express';
 import jwt from "jsonwebtoken";
+import fs from 'fs';
+import { Readable } from 'stream';
 
-import { createUser, ValidateUser, getUserProfile } from '../service/users.service';
+import { createUser, ValidateUser, getUserProfile } from '../services/users.service';
 
 export class AuthController {
     constructor() { }
@@ -34,9 +36,17 @@ export class AuthController {
             console.log('Error al obtener el perfil de usuario');
             if (!user) return res.status(404).json('el usuario no existe');
         }
-    }
+    };
+    
+    test(req: Request, res: Response) {
+        const test = fs.readFileSync('src/web-socket/audioMensajes/madre.ogg');
+        const retest = new Readable();
 
-    // signOut(req: Request, res: Response) {
-    //     res.send('recibido')
-    // }
+        retest.push(test)
+        res.set('content-type', 'audio/ogg');
+        res.set('accept-ranges', 'bytes');
+
+        console.log(retest);
+        return res.send(test)
+    }
 }

@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken'
-import { getUserById } from '../service/users.service';
+import { getUserById } from '../services/users.service';
 
 import { IPayload } from '../interfaces/userMoongose.interface';
 
