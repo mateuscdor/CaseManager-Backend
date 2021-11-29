@@ -37,16 +37,5 @@ export class AuthController {
             if (!user) return res.status(404).json('el usuario no existe');
         }
     };
-    
-    test(req: Request, res: Response) {
-        const test = fs.readFileSync('src/web-socket/audioMensajes/madre.ogg');
-        const retest = new Readable();
 
-        retest.push(test)
-        res.set('content-type', 'audio/ogg');
-        res.set('accept-ranges', 'bytes');
-
-        console.log(retest);
-        return res.send(test)
-    }
 }

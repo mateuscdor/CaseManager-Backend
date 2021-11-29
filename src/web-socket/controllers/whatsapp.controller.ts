@@ -1,5 +1,5 @@
 import socketio, { Socket } from "socket.io";
-import { WAConnection, WAConnectionState } from "@adiwajshing/baileys";
+import { MessageType, WAConnection, WAConnectionState } from "@adiwajshing/baileys";
 import fs from "fs";
 
 import ora from "ora";
@@ -122,11 +122,33 @@ export function WhatsappControllers(
     }
   };
 
+  SocketIO.on('send message', async text => {
+    const userIndex = UsersWspStates.findIndex((f) => f.userID === userID);
+    const UserWsp = UsersWspStates[userIndex].wsp;
+    await UserWsp.sendMessage(text.jid, text.text, MessageType.text);
+  })
+
   SocketIO.on("get selected chats", async (ChatsArr) => {
     await getChats(ChatsArr);
   });
-
+  
   const userIndex = UsersWspStates.findIndex((f) => f.userID === userID);
+  const User = UsersWspStates[userIndex];
+
+  User.wsp.on('chat-update', async  chat => {
+    if (chat.hasNewMessage) {
+      // console.log(chat.messages?.first);
+      io.to(User.socketID).emit('chat update', chat);
+      const msj = chat.messages!.first
+      if (!msj.key.fromMe) {
+        // User.wsp.sendMessage(chat.jid, 'Hola, en que puedo ayudarte')
+        if(chat.messages!.first.message!.conversation === 'Hola buenas tardes'){
+          const respuesta = 'Hola, buenas tardes. En este momento nuestra gestora esta ocupada, elija una de estas opciones para que podamos acelerar su gestion';
+          await User.wsp.sendMessage(chat.jid, respuesta, MessageType.text);
+        }
+      }
+    }
+  })
   informWSPStatus(UsersWspStates[userIndex].userID);
 
   return UsersWspStates[userIndex].wsp;

@@ -13,7 +13,6 @@ export class AuthRoutes {
     Routes() {
         this.authRouter.post('/signIn', this.AuthControllers.singIn);
         this.authRouter.get('/userProfile', [tokenValidation], this.AuthControllers.userProfile);
-        this.authRouter.get('/test', this.AuthControllers.test);
         return this.authRouter;
     }
 };
