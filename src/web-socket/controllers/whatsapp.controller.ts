@@ -64,9 +64,15 @@ export function WhatsappControllers(
 	const user = findUser(userID);
 
 	const connectWSP = async () => {
-		fs.mkdir(`${path.join(__dirname, 'auth')}`, (e) => {
-			console.log(e);
-		})
+		try {
+			fs.mkdir(`${path.join(__dirname, 'auth')}`, (e) => {
+				console.log(e);
+			})
+		} catch (error) {
+			console.log('La carpeta ya existe, Error: ', error);
+		}
+
+
 		spinner.info(`${chalk.blueBright('Iniciando conexion con wsp')}`);
 
 		UsersWspStates[user.index].wsp = makeWASocket({
