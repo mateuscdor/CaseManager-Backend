@@ -1,6 +1,6 @@
 import socketio, { Socket } from "socket.io";
 
-import { MessageType, WAConnection } from '@adiwajshing/baileys';
+import { WASocket } from '@adiwajshing/baileys-md';
 
 import { PaymentPlanModel } from '../MessageModels/paymentPlan.model';
 import { definitionPayModel } from '../MessageModels/definitionPay.model';
@@ -67,7 +67,7 @@ export function TaskControllers(
     });
 };
 
-async function CreateNewTask(TaskForm: ITaskform, UserID: string, UserFullName: string, Socket: Socket, io: socketio.Server, WhatsappConnection: WAConnection) {
+async function CreateNewTask(TaskForm: ITaskform, UserID: string, UserFullName: string, Socket: Socket, io: socketio.Server, WhatsappConnection: WASocket) {
     if (TaskForm.taskType === 'Enviar Mensajes de Whatsapp') {
         const Cases: ICase[] = TaskForm.CasesToSendWsp;
         const amount = Cases.length;
@@ -93,18 +93,19 @@ async function CreateNewTask(TaskForm: ITaskform, UserID: string, UserFullName: 
 
 };
 
-async function SendMessages(cases: ICase[], form: ITask, UserID: string, Socket: Socket, io: socketio.Server, Whatsapp: WAConnection) {
+async function SendMessages(cases: ICase[], form: ITask, UserID: string, Socket: Socket, io: socketio.Server, Whatsapp: WASocket) {
     const messagesSent: any[] = [];
     const messagesNotSent: any[] = [];
     const messages = ConvertToMessages(cases, form);
+    const realWS = UsersWspStates.find(e => e.userID === UserID)?.wsp!
     for await (const [index, Case] of messages.MESSAGES.entries()) {
         spinner.start();
 
         spinner.text = `Enviando un mensaje a: ${chalk.yellow(`${Case.titular} al ${Case.celular}, del tipo : ${Case.messageType}`)}`;
         spinner.color = 'yellow';
         try {
-            const sentMessage = await Whatsapp.sendMessage(`549${Case.celular}@s.whatsapp.net`, Case.message, MessageType.text);
-            // const sentMessage = await Whatsapp.sendMessage(`5491124222118@s.whatsapp.net`, Case.message, MessageType.text);
+            const sentMessage = await Whatsapp.sendMessage(`549${Case.celular}@s.whatsapp.net`, {text: Case.message});
+            // const sentMessage = await realWS.sendMessage(`5491124222118@s.whatsapp.net`, {text: Case.message});
             // const testPromise = new Promise<any>((resolve) => {
             //     setTimeout(() => {
             //         return resolve('se termino')
@@ -226,11 +227,11 @@ function ConvertToMessages(Cases: ICase[], form: ITask) {
 
 async function verifyWsp(cellphones: any[], userID: string) {
     const Whatsapp = UsersWspStates.find(e => e.userID === userID)!.wsp
-    console.log(Whatsapp.state)
+    // console.log(Whatsapp.state)
     const cellphonesVerified: any[] = [];
     for await (const cellphone of cellphones) {
         try {
-            const cellphoneVerified = await Whatsapp.isOnWhatsApp(`549${cellphone.numero}@s.whatsapp.net`);
+            const cellphoneVerified = await Whatsapp!.onWhatsApp(`549${cellphone.numero}@s.whatsapp.net`);
             if (cellphoneVerified) {
                 const obj = { ...cellphone, tipo: 'M' }
                 cellphonesVerified.push(obj);
