@@ -1,6 +1,6 @@
 import socketio, { Socket } from "socket.io";
 
-import { WASocket } from '@adiwajshing/baileys-md';
+import { WASocket , delay} from '@adiwajshing/baileys-md';
 
 import { PaymentPlanModel } from '../MessageModels/paymentPlan.model';
 import { definitionPayModel } from '../MessageModels/definitionPay.model';
@@ -103,15 +103,10 @@ async function SendMessages(cases: ICase[], form: ITask, UserID: string, Socket:
 
         spinner.text = `Enviando un mensaje a: ${chalk.yellow(`${Case.titular} al ${Case.celular}, del tipo : ${Case.messageType}`)}`;
         spinner.color = 'yellow';
+        await delay(2000)
         try {
-            const sentMessage = await Whatsapp.sendMessage(`549${Case.celular}@s.whatsapp.net`, {text: Case.message});
-            // const sentMessage = await realWS.sendMessage(`5491124222118@s.whatsapp.net`, {text: Case.message});
-            // const testPromise = new Promise<any>((resolve) => {
-            //     setTimeout(() => {
-            //         return resolve('se termino')
-            //     }, 500);
-            // });
-            // await testPromise;
+            const sentMessage = await realWS.sendMessage(`549${Case.celular}@s.whatsapp.net`, {text: Case.message});
+            // const sentMessage = await realWS.sendMessage(`5491150393620@s.whatsapp.net`, {text: Case.message});
             const messageSuccess = {
                 Titular: Case.titular,
                 ident_tipo: Case.ident_tipo,
@@ -231,8 +226,9 @@ async function verifyWsp(cellphones: any[], userID: string) {
     const cellphonesVerified: any[] = [];
     for await (const cellphone of cellphones) {
         try {
-            const cellphoneVerified = await Whatsapp!.onWhatsApp(`549${cellphone.numero}@s.whatsapp.net`);
-            if (cellphoneVerified) {
+            const [cellphoneVerified] = await Whatsapp!.onWhatsApp(`549${cellphone.numero}@s.whatsapp.net`);
+
+            if (cellphoneVerified && cellphoneVerified.exists) {
                 const obj = { ...cellphone, tipo: 'M' }
                 cellphonesVerified.push(obj);
                 console.log(cellphone);

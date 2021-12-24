@@ -2,3 +2,4 @@ node_modules
 dist
 
 src/web-socket/controllers/auth
+src/web-socket/controllers/chats
