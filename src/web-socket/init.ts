@@ -36,7 +36,6 @@ export class SocketServer {
                         };
                     };
                 });
-                const userIndex = this.users.findIndex(e => e !== undefined && e.UserID === user!.id);
                 /* TAREAS */
                 TaskControllers(socket, io, user.id, user.UserfullName);
 

@@ -15,7 +15,7 @@ import { ITaskform } from "web-socket/interfaces/taskForm.interface";
 import { ICase } from "interfaces/CaseMoongose.interface";
 
 /* whatsapp */
-import { UsersWspStates } from '../controllers/whatsapp.controller';
+import { getUser } from '../services/whatsappConn.service';
 
 type task = {
     socketID: string;
@@ -42,14 +42,14 @@ export function TaskControllers(
         };
         return e
     });
-    const WhatsappConnection = UsersWspStates.find(e => e.userID === userID)?.wsp
+    const WhatsappConnection = getUser(userID)!.wsp
     /* Nueva tarea recibida */
     Socket.on('create new task', async task => {
         if (task.taskType === 'Verificar numeros en Wsp') {
             const verified = await verifyWsp(task.phones, userID)
             io.to(Socket.id).emit('Phones Verified', verified);
         } else {
-            const newTask = await CreateNewTask(task, userID, UserFullName, Socket, io, WhatsappConnection!);
+            const newTask = CreateNewTask(task, userID, UserFullName, Socket, io, WhatsappConnection!);
             tasks.push({
                 socketID: Socket.id,
                 userID,
@@ -67,7 +67,7 @@ export function TaskControllers(
     });
 };
 
-async function CreateNewTask(TaskForm: ITaskform, UserID: string, UserFullName: string, Socket: Socket, io: socketio.Server, WhatsappConnection: WASocket) {
+function CreateNewTask(TaskForm: ITaskform, UserID: string, UserFullName: string, Socket: Socket, io: socketio.Server, WhatsappConnection: WASocket) {
     if (TaskForm.taskType === 'Enviar Mensajes de Whatsapp') {
         const Cases: ICase[] = TaskForm.CasesToSendWsp;
         const amount = Cases.length;
@@ -75,7 +75,7 @@ async function CreateNewTask(TaskForm: ITaskform, UserID: string, UserFullName: 
             id: uuidv4(),
             UserFullName,
             taskType: TaskForm.taskType,
-            amount: amount,
+            amount,
             messageType: TaskForm.messageType,
             state: 'Incompleto',
             progress: 0,
@@ -97,7 +97,7 @@ async function SendMessages(cases: ICase[], form: ITask, UserID: string, Socket:
     const messagesSent: any[] = [];
     const messagesNotSent: any[] = [];
     const messages = ConvertToMessages(cases, form);
-    const realWS = UsersWspStates.find(e => e.userID === UserID)?.wsp!
+    const realWS = getUser(UserID)!.wsp!
     for await (const [index, Case] of messages.MESSAGES.entries()) {
         spinner.start();
 
@@ -221,7 +221,7 @@ function ConvertToMessages(Cases: ICase[], form: ITask) {
 };
 
 async function verifyWsp(cellphones: any[], userID: string) {
-    const Whatsapp = UsersWspStates.find(e => e.userID === userID)!.wsp
+    const Whatsapp = getUser(userID)!.wsp!
     // console.log(Whatsapp.state)
     const cellphonesVerified: any[] = [];
     for await (const cellphone of cellphones) {

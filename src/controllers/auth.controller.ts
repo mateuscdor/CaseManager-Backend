@@ -3,8 +3,6 @@ import jwt from 'jsonwebtoken';
 import fs from 'fs';
 import path from 'path';
 import { createUser, ValidateUser, getUserProfile } from '../services/users.service';
-import { loadContentMessage } from '../web-socket/services/chat.service';
-import { Readable } from 'stream';
 
 export class AuthController {
 	constructor() {}
@@ -68,39 +66,6 @@ export class AuthController {
 			console.log('Error al obtener el perfil de usuario');
 			if (!user) return res.status(404).json('el usuario no existe');
 		}
-	}
+	};
 
-	async DownloadMedia(req: Request, res: Response) {
-		const m = req.body.message;
-		// console.log(m);
-		if (m !== undefined) {
-			const buffer = await loadContentMessage(m);
-			return res.json(buffer);
-		}
-		// fs.writeFileSync(
-		//     path.join(
-		//         __dirname,
-		//         `../web-socket/controllers/chats/media/${m.key.id}.ogg`
-		//     ),
-		//     buffer
-		// );
-		// return res.json(buffer);
-	}
-
-	async test(req: Request, res: Response) {
-		res.json({res: 'working'})
-		console.log(req.params);
-		// try {
-		// 	res.set('content-type', 'audio/ogg');
-		// 	const id = `${req.params.id}.ogg`;
-		// 	const p = path.join(__dirname, `../web-socket/controllers/chats/media/${id}`);
-		// 	const buffer = fs.readFileSync(p);
-		// 	console.log(req.params);
-
-		// 	return res.send(buffer);
-		// } catch (error) {
-
-		// 	console.log('no encontrado');
-		// }
-	}
 }

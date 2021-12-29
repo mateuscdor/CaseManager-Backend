@@ -17,8 +17,6 @@ export class AuthRoutes {
 			[tokenValidation],
 			this.AuthControllers.userProfile
 		);
-		this.authRouter.post('/getAudioBuffer', this.AuthControllers.DownloadMedia);
-        this.authRouter.get('/test/:id', this.AuthControllers.test)
 		return this.authRouter;
 	}
 }
