@@ -10,7 +10,8 @@
 	"nodemonConfig": {
 		"ignore": [
 			"./src/web-socket/controllers/auth/*",
-			"./src/web-socket/controllers/chats/*"
+			"./src/web-socket/controllers/chats/*",
+			"./src/web-socket/services/Task-Services/db/*.json"
 		],
 		"delay": 2500
 	},

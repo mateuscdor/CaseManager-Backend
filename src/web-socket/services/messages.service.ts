@@ -30,7 +30,7 @@ export const upsertMessages = async (
 			UserChatHistory.chats[i].messages = UserChatHistory.chats[i].messages.slice(-25);
 	});
 
-	UserChatHistory.chats = await downloadContent(UserChatHistory.chats);
+	// UserChatHistory.chats = await downloadContent(UserChatHistory.chats);
 	
 	SaveFile(UserChatHistory, userID);
 	console.log(chalk.blueBright('[MESSAGES.UPSERT]'));
